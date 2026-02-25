@@ -1,4 +1,5 @@
 'use client'
+import { Trash2 } from 'lucide-react'
 import React, { useState } from 'react'
 
 const TodoList = () => {
@@ -24,6 +25,12 @@ const TodoList = () => {
 
             e.target.value = '';
         }
+    };
+
+    const deleteTask = (index) => {
+        const temp = tasklist;
+        temp.splice(index, 1);
+        settasklist([...temp]);
     }
 
   return (
@@ -62,11 +69,37 @@ const TodoList = () => {
                         ):(
                             tasklist.map( (obj, index) => {
                                 return <div key={index} 
-                                className='border border-gray-400 p-4 mb-4 rounded-xl shadow-lg'>
-                                    <p className=' text-lg'>
+                                className='border border-gray-400 p-4 mb-4 rounded-xl shadow-lg flex justify-between items-center'>
+                                    
+                                    <div className='w-1/3 flex gap-3'>
+                                        <input type="checkbox" 
+                                            onChange={ (e) => {
+                                                const temp = tasklist;
+                                                temp[index].completed = e.target.checked;
+                                                settasklist([...temp]);
+                                            }}
+                                        />
+                                        <p className='text-lg'>
                                         {obj.task}
                                     </p>
+                                    </div>
                                     
+                                    
+                                    {
+                                        obj.completed ? (
+                                            <p className='text-sm font-semibold bg-green-200 text-green-800 px-2 rounded-full'>
+                                                Completed</p>
+                                        ) : (
+                                            <p className='text-sm font-semibold bg-amber-200 text-amber-800 px-2 rounded-full'>
+                                                Pending</p>
+                                        )
+                                    }
+
+                                    <button 
+                                        onClick= { () => { deleteTask(index) } }
+                                        className='bg-red-500 text-white p-2 rounded-md'>
+                                        <Trash2/>
+                                    </button>
                                 </div>
                             })
                         )
