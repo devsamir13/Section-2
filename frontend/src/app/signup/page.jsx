@@ -1,7 +1,24 @@
-'use client'
-import MyButton from '@/components/MyButton'
+'use client';
+import axios from 'axios';
 import { useFormik } from 'formik'
 import React from 'react'
+import * as Yup from 'yup';
+import toast from 'react-hot-toast';
+
+const signupSchema = Yup.object().shape({
+  name: Yup.string().required("Name nhi hai kya?"). min(3, "Too short!"),
+  email: Yup.string().required("Email dal le bhai"). email ("Invalid email"),
+  password : Yup.string().required('password is required')
+             .matches(/[A-Z]/, 'uppercase is required')
+             .matches(/[a-z]/,'lowercase is required')
+             .matches(/[0-9]/, 'digit is required')
+             .matches(/[@#./_]/, 'special character is required')
+             .min(8, 'too short'),
+
+            confirmPassword : Yup.string().required('password is required')
+              .oneOf([Yup.ref('password'),null], 'password must match')
+
+});
 
 const Signup = () => {
 
@@ -12,12 +29,24 @@ const Signup = () => {
         password: '',
         confirmPassword: ''
       },
-      onSubmit: (values) => {
+
+      onSubmit: async (values) => {
         console.log(values);
         
         // send values to backend
+      const res = await axios.post('http://localhost:3200/user/add',values)
+      console.log(res.status);
+      if(res.status ===200){
+        toast.success("Accout created successfully");
+      }else{
+        toast.sucesss("Signup failed");
       }
-    })
+      
+
+      },
+
+      validationSchema: signupSchema
+    }); 
 
   return (
     <div className='min-h-screen bg-gray-100 py-10'>
@@ -48,20 +77,60 @@ const Signup = () => {
       <div className="py-3 flex items-center text-xs text-gray-400 uppercase before:flex-1 before:border-t before:border-gray-200 before:me-6 after:flex-1 after:border-t after:border-gray-200 after:ms-6">Or</div>
 
       {/* Form */}
-      <form>
+
+      {/* {`always use as it is in any where in any from for form validation and always need to and three props into input
+      and props is 
+            1.  id="email" or name= "name"
+            2.  onChange={signupForm.handleChange}
+            3.  value={signupForm.values.email}  `} */}
+
+      <form onSubmit={signupForm.handleSubmit}> 
         <div className="grid gap-y-4">
           {/* Form Group */}
           <div>
-            <label htmlFor="email" className="block text-sm mb-2 text-gray-800">Email address</label>
+            <label htmlFor="name" className="block text-sm mb-2 text-gray-800">Full Name</label>
             <div className="relative">
-              <input type="email" id="email" name="email" className="py-2.5 sm:py-3 px-4 block w-full bg-white border-gray-200 rounded-lg sm:text-sm text-gray-800 placeholder:text-gray-500 focus:border-blue-700 focus:ring-blue-700 disabled:opacity-50 disabled:pointer-events-none" required aria-describedby="email-error" />
+              <input type="text" 
+              id="name" 
+              onChange={signupForm.handleChange}
+              value={signupForm.values.name}
+              className="py-2.5 sm:py-3 px-4 block w-full bg-white border-gray-200 rounded-lg sm:text-sm text-gray-800 placeholder:text-gray-500 focus:border-blue-700 focus:ring-blue-700 disabled:opacity-50 disabled:pointer-events-none" aria-describedby="email-error" />
               <div className="hidden absolute inset-y-0 end-0 pointer-events-none pe-3">
                 <svg className="size-5 text-red-500" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
                   <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8 4a.905.905 0 0 0-.9.995l.35 3.507a.552.552 0 0 0 1.1 0l.35-3.507A.905.905 0 0 0 8 4zm.002 6a1 1 0 1 0 0 2 1 1 0 0 0 0-2z"/>
                 </svg>
               </div>
             </div>
-            <p className="hidden text-xs text-red-600 mt-2" id="email-error">Please include a valid email address so we can get back to you</p>
+            {
+              (signupForm.errors.name && signupForm.touched.name) && (
+                  <p className="text-xs text-red-600 mt-2" id="email-error">{ signupForm.errors.name }</p>
+              )
+            }
+            
+          </div>
+          {/* End Form Group */}
+        
+          {/* Form Group */}
+          <div>
+            <label htmlFor="email" className="block text-sm mb-2 text-gray-800">Email address</label>
+            <div className="relative">
+              <input type="email" 
+              id="email" 
+              onChange={signupForm.handleChange}
+              value={signupForm.values.email} 
+              className="py-2.5 sm:py-3 px-4 block w-full bg-white border-gray-200 rounded-lg sm:text-sm text-gray-800 placeholder:text-gray-500 focus:border-blue-700 focus:ring-blue-700 disabled:opacity-50 disabled:pointer-events-none" aria-describedby="email-error" />
+              <div className="hidden absolute inset-y-0 end-0 pointer-events-none pe-3">
+                <svg className="size-5 text-red-500" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
+                  <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8 4a.905.905 0 0 0-.9.995l.35 3.507a.552.552 0 0 0 1.1 0l.35-3.507A.905.905 0 0 0 8 4zm.002 6a1 1 0 1 0 0 2 1 1 0 0 0 0-2z"/>
+                </svg>
+              </div>
+            </div>
+             {
+              (signupForm.errors.email && signupForm.touched.email) && (
+                  <p className="text-xs text-red-600 mt-2" id="email-error">{ signupForm.errors.email }</p>
+              )
+            }
+           
           </div>
           {/* End Form Group */}
 
@@ -71,14 +140,23 @@ const Signup = () => {
               <label htmlFor="password" className="block text-sm mb-2 text-gray-800">Password</label>
             </div>
             <div className="relative">
-              <input type="password" id="password" name="password" className="py-2.5 sm:py-3 px-4 block w-full bg-white border-gray-200 rounded-lg sm:text-sm text-gray-800 placeholder:text-gray-500 focus:border-blue-700 focus:ring-blue-700 disabled:opacity-50 disabled:pointer-events-none" required aria-describedby="password-error" />
+              <input type="password" 
+              id="password" 
+              onChange={signupForm.handleChange}
+              value={signupForm.values.password}
+              className="py-2.5 sm:py-3 px-4 block w-full bg-white border-gray-200 rounded-lg sm:text-sm text-gray-800 placeholder:text-gray-500 focus:border-blue-700 focus:ring-blue-700 disabled:opacity-50 disabled:pointer-events-none" aria-describedby="password-error" />
               <div className="hidden absolute inset-y-0 end-0 pointer-events-none pe-3">
                 <svg className="size-5 text-red-500" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
                   <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8 4a.905.905 0 0 0-.9.995l.35 3.507a.552.552 0 0 0 1.1 0l.35-3.507A.905.905 0 0 0 8 4zm.002 6a1 1 0 1 0 0 2 1 1 0 0 0 0-2z"/>
                 </svg>
               </div>
             </div>
-            <p className="hidden text-xs text-red-600 mt-2" id="password-error">8+ characters required</p>
+             {
+              (signupForm.errors.password && signupForm.touched.password) && (
+                  <p className="text-xs text-red-600 mt-2" id="email-error">{ signupForm.errors.password }</p>
+              )
+            }
+           
           </div>
           {/* End Form Group */}
 
@@ -86,21 +164,33 @@ const Signup = () => {
           <div>
             <label htmlFor="confirm-password" className="block text-sm mb-2 text-gray-800">Confirm Password</label>
             <div className="relative">
-              <input type="password" id="confirm-password" name="confirm-password" className="py-2.5 sm:py-3 px-4 block w-full bg-white border-gray-200 rounded-lg sm:text-sm text-gray-800 placeholder:text-gray-500 focus:border-blue-700 focus:ring-blue-700 disabled:opacity-50 disabled:pointer-events-none" required aria-describedby="confirm-password-error" />
+              <input type="password" 
+              id="confirmPassword" 
+              onChange={signupForm.handleChange}
+              value={signupForm.values.confirmPassword}
+              className="py-2.5 sm:py-3 px-4 block w-full bg-white border-gray-200 rounded-lg sm:text-sm text-gray-800 placeholder:text-gray-500 focus:border-blue-700 focus:ring-blue-700 disabled:opacity-50 disabled:pointer-events-none" aria-describedby="confirm-password-error" />
               <div className="hidden absolute inset-y-0 end-0 pointer-events-none pe-3">
                 <svg className="size-5 text-red-500" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
                   <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8 4a.905.905 0 0 0-.9.995l.35 3.507a.552.552 0 0 0 1.1 0l.35-3.507A.905.905 0 0 0 8 4zm.002 6a1 1 0 1 0 0 2 1 1 0 0 0 0-2z"/>
                 </svg>
               </div>
             </div>
-            <p className="hidden text-xs text-red-600 mt-2" id="confirm-password-error">Password does not match the password</p>
+             {
+              (signupForm.errors.confirmPassword && signupForm.touched.confirmPassword) && (
+                  <p className="text-xs text-red-600 mt-2" id="email-error">{ signupForm.errors.confirmPassword }</p>
+              )
+            }
+           
           </div>
           {/* End Form Group */}
 
           {/* Checkbox */}
           <div className="flex items-center">
             <div className="flex">
-              <input id="checkbox" name="checkbox" type="checkbox" className="shrink-0 size-4 bg-transparent border-gray-300 rounded-sm shadow-2xs text-blue-600 focus:ring-0 focus:ring-offset-0 checked:bg-blue-600 checked:border-blue-600 disabled:opacity-50 disabled:pointer-events-none" />
+              <input id="checkbox" 
+              type="checkbox" 
+
+              className="shrink-0 size-4 bg-transparent border-gray-300 rounded-sm shadow-2xs text-blue-600 focus:ring-0 focus:ring-offset-0 checked:bg-blue-600 checked:border-blue-600 disabled:opacity-50 disabled:pointer-events-none" />
             </div>
             <div className="ms-3">
               <label htmlFor="checkbox" className="text-sm text-gray-800">
