@@ -34,15 +34,14 @@ const Signup = () => {
         console.log(values);
         
         // send values to backend
-      const res = await axios.post('http://localhost:3200/user/add',values)
+      const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/user/add`,values)
       console.log(res.status);
-      if(res.status ===200){
+      if(res.status === 200){
         toast.success("Accout created successfully");
       }else{
         toast.sucesss("Signup failed");
       }
       
-
       },
 
       validationSchema: signupSchema
