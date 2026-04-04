@@ -17,6 +17,9 @@ const Login = () => {
         axios.post(`${process.env.NEXT_PUBLIC_API_URL}/user/authenticate`,values)
         .then((response) => {
             toast.success('Login Successful');
+            console.log(response.data);
+            const {token} = response.data;
+            localStorage.setItem('token', token)
         }).catch((err) => {
           console.log(err);
           if (err.response.status === 403) {
